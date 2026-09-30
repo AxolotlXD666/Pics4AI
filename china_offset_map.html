@@ -1,46 +1,116 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>中国 Google Earth 相对偏移实测</title>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>中国 Google Earth / Maps 地理偏移实测汇总</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#eef1f4;color:#20252b;font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
-.wrap{max-width:1500px;margin:22px auto;padding:0 18px}.card{background:#fff;border:1px solid #dce1e6;border-radius:18px;overflow:hidden;box-shadow:0 12px 38px #00000012}
-header{padding:24px 28px 18px;border-bottom:1px solid #e4e7ea;display:flex;justify-content:space-between;align-items:end}
-h1{margin:0 0 7px;font-size:25px}.sub{font-size:13px;color:#6c747d}.count{font-size:12px;color:#6c747d;border:1px solid #dce1e6;padding:7px 10px;border-radius:99px}
-.main{display:grid;grid-template-columns:minmax(0,1fr) 330px}.map{position:relative;background:#f9fafb}svg{width:100%;height:820px;display:block}
-.province{fill:#edf0f2;stroke:#aab2bb;stroke-width:1.05}.arrow{stroke:#c52f2f;fill:#c52f2f;stroke-linecap:round;filter:drop-shadow(0 1px 1px #fff)}.dot{fill:#fff;stroke:#1e2429;stroke-width:2.6}.label{font-size:20px;font-weight:700;fill:#20252b;paint-order:stroke;stroke:white;stroke-width:6px;pointer-events:none}
-.side{border-left:1px solid #e3e6e9;padding:20px}.side h2{font-size:16px;margin:0 0 5px}.hint{font-size:12px;color:#747d86;line-height:1.6;margin-bottom:16px}
-.item{border:1px solid #e0e4e8;border-radius:11px;padding:12px;margin-bottom:9px;cursor:pointer}.item:hover{border-color:#c5cbd1;box-shadow:0 4px 14px #0000000c}.top{display:flex;justify-content:space-between;font-size:13px;font-weight:700}.dist{color:#c33f3f}.site{font-size:11px;color:#747d86;margin-top:4px}.meta{font-size:11px;color:#4f5861;margin-top:7px}
-.legend{position:absolute;left:18px;bottom:18px;background:#fffffff2;border:1px solid #dce1e6;border-radius:11px;padding:11px 13px;font-size:11px;line-height:1.8;box-shadow:0 4px 15px #00000010}.red{display:inline-block;width:30px;height:3px;background:#d34a4a;vertical-align:middle;margin-right:7px}
-.note{font-size:11px;color:#747d86;line-height:1.65;border-top:1px solid #e4e7ea;padding-top:14px;margin-top:18px}
-.tip{position:fixed;display:none;z-index:9;background:#20252b;color:white;border-radius:9px;padding:9px 12px;font-size:12px;line-height:1.6;pointer-events:none;box-shadow:0 7px 24px #0005}
-@media(max-width:900px){.main{grid-template-columns:1fr}.side{border-left:0;border-top:1px solid #e3e6e9}.map svg{height:560px}header{align-items:flex-start;gap:15px;flex-direction:column}}
-</style></head><body>
-<div class="wrap"><div class="card">
-<header><div><h1>中国各城市 Google Earth 相对偏移实测</h1><div class="sub">方向与距离来自已完成的地物对照测量；箭头统一放大显示，保持距离比例。</div></div><div class="count">当前纳入：3 个已确认样本 · 点击城市可查看局部</div></header>
-<div class="main"><div class="map"><svg id="map" viewBox="0 0 1120 820"></svg>
-<div class="legend"><div><span class="red"></span>相对偏移方向</div><div>○ 城市实测位置</div><div>箭头长度为视觉放大，不代表全国地图比例</div></div></div>
-<aside class="side"><h2>测量记录</h2><div class="hint">点击右侧记录可聚焦对应城市；悬停箭头查看详细数据。</div><div id="list"></div><div class="note">底图：cn-atlas 公开中国省级行政区 GeoJSON。该数据集提供省级、全国边界 GeoJSON，坐标未投影。<br><br>未把鼠标指针坐标当作地理基准；已撤回的西安旧估计值也没有纳入。</div></aside></div>
-</div></div><div id="tip" class="tip"></div>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f7;color:#18212b;font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}
+.page{width:min(1700px,100%);margin:auto;padding:22px}
+.card{background:#fff;border:1px solid #d9dee4;border-radius:16px;overflow:hidden;box-shadow:0 10px 35px #00000012}
+header{padding:22px 28px 18px;border-bottom:1px solid #e1e5e9}
+h1{margin:0;font-size:25px;letter-spacing:.2px}
+.subtitle{margin-top:7px;color:#68737e;font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px}
+.mapbox{position:relative;background:#f8fafb}
+svg{display:block;width:100%;height:900px}
+.province{fill:#edf1f3;stroke:#aeb7c0;stroke-width:.7}
+.coast{fill:none;stroke:#7f8a95;stroke-width:1.2}
+.arrow{stroke:#d62929;fill:#d62929;stroke-linecap:round;stroke-linejoin:round}
+.city-dot{fill:#fff;stroke:#18212b;stroke-width:2.5}
+.city-label{font-size:17px;font-weight:800;fill:#18212b;paint-order:stroke;stroke:#fff;stroke-width:6px;stroke-linejoin:round}
+.data-label{font-size:13px;font-weight:700;fill:#a91f1f;paint-order:stroke;stroke:#fff;stroke-width:5px}
+.side{border-left:1px solid #e1e5e9;padding:18px 18px 20px;background:#fff}
+.side h2{font-size:16px;margin:0 0 13px}
+.city{padding:12px 0;border-top:1px solid #e7eaed}
+.city:first-of-type{border-top:0}
+.cityhead{display:flex;justify-content:space-between;gap:10px;font-weight:800;font-size:14px}
+.records{margin-top:6px;color:#4e5964;font-size:12px;line-height:1.65}
+.tag{display:inline-block;margin:2px 5px 2px 0;padding:2px 7px;border-radius:6px;background:#f3f5f6}
+.legend{position:absolute;left:18px;bottom:18px;background:#fffffff5;border:1px solid #dce1e5;border-radius:10px;padding:10px 13px;font-size:11px;line-height:1.8;box-shadow:0 4px 16px #00000012}
+.legend i{display:inline-block;width:30px;height:5px;background:#d62929;vertical-align:middle;margin-right:7px;border-radius:3px}
+.footer{padding:12px 28px;color:#77818b;font-size:11px;border-top:1px solid #e1e5e9;line-height:1.6}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.side{border-left:0;border-top:1px solid #e1e5e9}svg{height:650px}}
+</style>
+</head>
+<body>
+<div class="page"><div class="card">
+<header>
+<h1>中国各城市 Google Earth / Maps 相对偏移实测汇总</h1>
+<div class="subtitle">同一城市的多个测量合并显示；红色箭头表示已记录的偏移方向，箭头长度为视觉放大。</div>
+</header>
+<div class="layout">
+<div class="mapbox">
+<svg id="map" viewBox="0 0 1240 900" aria-label="中国偏移实测地图"></svg>
+<div class="legend"><div><i></i>实测偏移方向</div><div>● 实测城市 / 地标位置</div><div>数字为实测距离；箭头仅用于清晰展示，不代表地图比例</div></div>
+</div>
+<aside class="side">
+<h2>全部已保留测量记录</h2>
+<div id="records"></div>
+</aside>
+</div>
+<div class="footer">底图采用 cn-atlas 的中国省级行政区 GeoJSON；该数据集说明其省级边界 GeoJSON 为未投影经纬度数据。citeturn0search0　已撤回的西安旧值约160m SE、未确认/撤回的深圳何香凝美术馆旧值等不纳入。</div>
+</div></div>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script>
-const S=[{"city":"成都","site":"已确认地标样本","lat":30.5728,"lon":104.0665,"distance":320,"bearing":225,"direction":"西南","uncertainty":"±20 m"},{"city":"武汉","site":"辛亥革命博物馆","lat":30.5928,"lon":114.3055,"distance":700,"bearing":45,"direction":"东北","uncertainty":"±30 m"},{"city":"西安","site":"小雁塔","lat":34.2408,"lon":108.9374,"distance":680,"bearing":112,"direction":"东南偏东","uncertainty":"±30–40 m"}];
-const svg=d3.select("#map"),tip=document.getElementById("tip"),W=1120,H=820;
-const P=d3.geoMercator().center([105,35.5]).scale(950).translate([W/2,H/2+40]),path=d3.geoPath(P);
-function end(s){const p=P([s.lon,s.lat]),a=s.bearing*Math.PI/180,L=s.distance/1000*75;return[p[0]+L*Math.sin(a),p[1]-L*Math.cos(a)]}
-function show(e,s){tip.style.display="block";tip.style.left=e.clientX+14+"px";tip.style.top=e.clientY+14+"px";tip.innerHTML="<b>"+s.city+" · "+s.site+"</b><br>偏移约 "+s.distance+" m（"+s.uncertainty+"）<br>方向："+s.direction}
-function hide(){tip.style.display="none"}
-async function main(){
- const gjson=await fetch("https://cdn.jsdelivr.net/npm/cn-atlas@0.1.2/provinces.json").then(r=>r.json());
- svg.append("g").selectAll("path").data(gjson.features||gjson).join("path").attr("class","province").attr("d",path);
- const g=svg.append("g");
- S.forEach((s,i)=>{const p=P([s.lon,s.lat]),[x,y]=p,[ex,ey]=end(s),dx=ex-x,dy=ey-y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L,px=-uy,py=ux;
-  const l=g.append("line").attr("class","arrow").attr("stroke-width",8).attr("x1",x).attr("y1",y).attr("x2",ex).attr("y2",ey);
-  const h=g.append("polygon").attr("class","arrow").attr("points",ex+","+ey+" "+(ex-ux*20+px*9)+","+(ey-uy*20+py*9)+" "+(ex-ux*20-px*9)+","+(ey-uy*20-py*9));
-  const d=g.append("circle").attr("class","dot").attr("cx",x).attr("cy",y).attr("r",11);
-  [l,h,d].forEach(o=>o.on("mousemove",e=>show(e,s)).on("mouseleave",hide));
-  g.append("text").attr("class","label").attr("x",x+9).attr("y",y+(i%2?27:-13)).text(s.city);
- });
- const list=document.getElementById("list");S.forEach(s=>{const el=document.createElement("div");el.className="item";el.innerHTML='<div class="top"><span>'+s.city+'</span><span class="dist">'+s.distance+' m</span></div><div class="site">'+s.site+'</div><div class="meta">'+s.direction+' · '+s.uncertainty+'</div>';el.onmousemove=e=>show(e,s);el.onmouseleave=hide;list.appendChild(el)})
+const DATA=[
+ {city:"北京",lat:39.9163,lon:116.3972,items:[{d:615,dir:"东北",bearing:45,site:"故宫 / 神武门"}]},
+ {city:"哈尔滨",lat:45.8038,lon:126.5349,items:[{d:535,dir:"东北",bearing:45,site:"龙塔",u:"±30 m"}]},
+ {city:"青岛",lat:36.0605,lon:120.3247,items:[{d:450,dir:"西",bearing:270,site:"人民会堂",u:"约400–500 m"}]},
+ {city:"郑州",lat:34.7466,lon:113.6254,items:[{d:530,dir:"东南",bearing:135,site:"博物馆新馆"}]},
+ {city:"西安",lat:34.2408,lon:108.9374,items:[{d:680,dir:"东南偏东",bearing:112,site:"小雁塔",u:"±30–40 m"}]},
+ {city:"成都",lat:30.5728,lon:104.0665,items:[{d:320,dir:"西南",bearing:225,site:"杜甫草堂",u:"±20 m"}]},
+ {city:"武汉",lat:30.5928,lon:114.3055,items:[{d:700,dir:"东北",bearing:45,site:"辛亥革命博物馆",u:"±30 m"}]},
+ {city:"贵阳",lat:26.6470,lon:106.6302,items:[{d:550,dir:"东南",bearing:135,site:"已记录设施样本"}]},
+ {city:"兰州",lat:36.0611,lon:103.8343,items:[{d:210,dir:null,bearing:null,site:"甘肃省图书馆"}]}
+];
+const W=1240,H=900,svg=d3.select("#map");
+const g=d3.select("#map");
+const projection=d3.geoMercator();
+const path=d3.geoPath(projection);
+function mainland(f){
+ const p=f.properties||{};
+ const name=(p["地名"]||p.name||"");
+ return !/台湾/.test(name);
 }
-main();
-function focusCity(i){const s=S[i],p=P([s.lon,s.lat]); const targetX=W/2,targetY=H/2; const dx=targetX-p[0],dy=targetY-p[1]; svg.selectAll("g").transition().duration(500).attr("transform","translate("+dx+","+dy+") scale(2.6)");}document.querySelectorAll(".item").forEach((el,i)=>el.addEventListener("click",()=>focusCity(i)));</script></body></html>
+async function draw(){
+ const geo=await fetch("https://cdn.jsdelivr.net/npm/cn-atlas@latest/provinces.json").then(r=>r.json());
+ const fs=(geo.features||[]).filter(mainland);
+ projection.fitExtent([[45,35],[W-45,H-35]],{type:"FeatureCollection",features:fs});
+ g.append("g").selectAll("path").data(fs).join("path").attr("class","province").attr("d",path);
+ const arrowLayer=g.append("g");
+ const labelLayer=g.append("g");
+ const cityIndex=[];
+ const offsets=[[-9,-13],[10,-13],[-9,28],[10,28],[-18,-30],[18,-30]];
+ DATA.forEach((c,ci)=>{
+   const p=projection([c.lon,c.lat]); cityIndex.push({c,p});
+   arrowLayer.append("circle").attr("class","city-dot").attr("cx",p[0]).attr("cy",p[1]).attr("r",8);
+   const off=offsets[ci%offsets.length];
+   labelLayer.append("text").attr("class","city-label").attr("x",p[0]+off[0]).attr("y",p[1]+off[1]).text(c.city);
+   c.items.forEach((it,ri)=>{
+     if(it.bearing==null){
+       labelLayer.append("text").attr("class","data-label").attr("x",p[0]+12).attr("y",p[1]+16+ri*17).text(it.d+"m（方向未记录）");
+       return;
+     }
+     const a=it.bearing*Math.PI/180;
+     const L=Math.max(34,Math.min(88,it.d/1000*105));
+     const ex=p[0]+L*Math.sin(a), ey=p[1]-L*Math.cos(a);
+     const dx=ex-p[0],dy=ey-p[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,px=-uy,py=ux;
+     arrowLayer.append("line").attr("class","arrow").attr("stroke-width",7).attr("x1",p[0]).attr("y1",p[1]).attr("x2",ex).attr("y2",ey);
+     arrowLayer.append("polygon").attr("class","arrow").attr("points",
+       ex+","+ey+" "+(ex-ux*17+px*8)+","+(ey-uy*17+py*8)+" "+(ex-ux*17-px*8)+","+(ey-uy*17-py*8));
+     labelLayer.append("text").attr("class","data-label").attr("x",ex+ux*8).attr("y",ey+uy*8).text(it.d+"m · "+it.dir);
+   });
+ });
+}
+const records=document.getElementById("records");
+DATA.forEach(c=>{
+ const div=document.createElement("div");div.className="city";
+ div.innerHTML='<div class="cityhead"><span>'+c.city+'</span><span>'+c.items.length+' 条</span></div>'+
+ c.items.map(x=>'<div class="records"><span class="tag">'+x.site+'</span><span class="tag">'+x.d+' m</span><span class="tag">'+(x.dir||"方向未记录")+'</span>'+(x.u?'<span class="tag">'+x.u+'</span>':'')+'</div>').join("");
+ records.appendChild(div);
+});
+draw();
+</script>
+</body></html>
