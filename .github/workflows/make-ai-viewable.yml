@@ -8,7 +8,7 @@ on:
       - '屏幕截图 2026-09-30 131516.png'
       - '屏幕截图 2026-09-30 134523.png'
       - '屏幕截图 2026-09-30 141007.png'
-      - '屏幕截图 2026-09-30 143344.png'
+      - '*.png'
       - '.github/workflows/make-ai-viewable.yml'
 
 permissions:
@@ -36,12 +36,18 @@ jobs:
           convert "屏幕截图 2026-09-30 131516.png" -resize "1600x1600>" -strip -quality 85 ai-view/new2.jpg
           convert "屏幕截图 2026-09-30 134523.png" -resize "1600x1600>" -strip -quality 85 ai-view/new3.jpg
           convert "屏幕截图 2026-09-30 141007.png" -resize "1600x1600>" -strip -quality 85 ai-view/new4.jpg
-          convert "屏幕截图 2026-09-30 143344.png" -resize "1600x1600>" -strip -quality 85 ai-view/new5.jpg
+
+          # Automatically create an AI-viewable copy for every PNG in the repo root.
+          for f in *.png; do
+            [ -e "$f" ] || continue
+            base="${f%.png}"
+            convert "$f" -resize "1600x1600>" -strip -quality 85 "ai-view/${base}.jpg"
+          done
 
       - name: Commit converted copies
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ai-view/screenshot.jpg ai-view/highway.jpg ai-view/full.jpg ai-view/new.jpg ai-view/new2.jpg ai-view/new3.jpg ai-view/new4.jpg ai-view/new5.jpg
+          git add ai-view/
           git diff --cached --quiet || git commit -m "Add full view for scale measurement"
           git push
