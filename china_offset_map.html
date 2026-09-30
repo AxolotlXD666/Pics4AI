@@ -3,7 +3,7 @@
 *{box-sizing:border-box}body{margin:0;background:#f2f4f6;color:#17202a;font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif}.page{max-width:1700px;margin:auto;padding:20px}.card{background:#fff;border:1px solid #d8dde2;border-radius:16px;overflow:hidden;box-shadow:0 10px 32px #0001}
 header{padding:22px 28px 16px;border-bottom:1px solid #e1e5e8}h1{margin:0;font-size:26px}.sub{margin-top:7px;color:#68737d;font-size:13px}.body{display:grid;grid-template-columns:minmax(0,1fr) 310px}.map{background:#f9fafb;position:relative}svg{width:100%;height:850px;display:block}.land{fill:#e9edf0;stroke:#8f99a3;stroke-width:1.05}.arrow{stroke:#e32626;fill:#e32626;stroke-linecap:round;stroke-linejoin:round}.dot{fill:#fff;stroke:#18212b;stroke-width:3}.city{font-size:19px;font-weight:800;fill:#18212b;paint-order:stroke;stroke:#fff;stroke-width:6px}.measure{font-size:14px;font-weight:800;fill:#b51d1d;paint-order:stroke;stroke:#fff;stroke-width:5px}.legend{position:absolute;left:18px;bottom:18px;background:#fffffff5;border:1px solid #d9dee3;border-radius:10px;padding:10px 13px;font-size:11px;line-height:1.8}.line{display:inline-block;width:34px;height:6px;background:#e32626;border-radius:3px;vertical-align:middle;margin-right:7px}.side{border-left:1px solid #e1e5e8;padding:20px;background:#fff}.side h2{margin:0 0 12px;font-size:16px}.rec{border-top:1px solid #e5e8eb;padding:12px 0}.rec:first-of-type{border-top:0}.name{font-size:15px;font-weight:800}.row{font-size:12px;color:#505b65;line-height:1.8}.badge{display:inline-block;background:#f1f3f5;border-radius:5px;padding:1px 6px;margin:2px 4px 2px 0}.note{margin-top:18px;padding-top:14px;border-top:1px solid #e5e8eb;font-size:11px;color:#727c86;line-height:1.65}
 @media(max-width:900px){.body{grid-template-columns:1fr}.side{border-left:0;border-top:1px solid #e1e5e8}svg{height:600px}}
-</style></head><body><div class="page"><div class="card"><header><h1>中国各城市 Google Maps 相对偏移实测</h1><div class="sub">已确认实测样本总览；同一城市若有多条记录，将在同一城市点汇总展示。</div></header><div class="body"><div class="map"><svg id="map" viewBox="0 0 1240 850"></svg><div class="legend"><div><span class="line"></span>实测偏移方向</div><div>● 城市 / 地标位置</div><div>箭头为视觉放大，数字为实际测量距离</div></div></div><aside class="side"><h2>已确认数据</h2><div id="list"></div><div class="note">只纳入此前已经实际确认的测量。已排除旧的未确认/虚构数据，以及西安已撤回的约160m SE旧值。地图底图直接嵌入本 HTML，不依赖外部地图文件。</div></aside></div></div></div>
+</style><script src="https://cdn.jsdelivr.net/npm/d3@7"></script></head><body><div class="page"><div class="card"><header><h1>中国各城市 Google Maps 相对偏移实测</h1><div class="sub">已确认实测样本总览；同一城市若有多条记录，将在同一城市点汇总展示。</div></header><div class="body"><div class="map"><svg id="map" viewBox="0 0 1240 850"></svg><div class="legend"><div><span class="line"></span>实测偏移方向</div><div>● 城市 / 地标位置</div><div>箭头为视觉放大，数字为实际测量距离</div></div></div><aside class="side"><h2>已确认数据</h2><div id="list"></div><div class="note">只纳入此前已经实际确认的测量。已排除旧的未确认/虚构数据，以及西安已撤回的约160m SE旧值。地图底图直接嵌入本 HTML，不依赖外部地图文件。</div></aside></div></div></div>
 <script>
 const DATA=[{"city":"成都","lat":30.5728,"lon":104.0665,"items":[{"d":320,"dir":"西南","bearing":225,"site":"已确认样本","u":"±20 m"}]},{"city":"武汉","lat":30.5928,"lon":114.3055,"items":[{"d":700,"dir":"东北","bearing":45,"site":"辛亥革命博物馆","u":"±30 m"}]},{"city":"西安","lat":34.2408,"lon":108.9374,"items":[{"d":680,"dir":"东南偏东","bearing":112,"site":"小雁塔","u":"±30–40 m"}]},{"city":"贵阳","lat":26.647,"lon":106.6302,"items":[{"d":550,"dir":"东南","bearing":135,"site":"观山湖公园北入口","u":"约±9 m"}]}];
 const GEO={"type":"FeatureCollection", "features": [
@@ -11,7 +11,7 @@ const GEO={"type":"FeatureCollection", "features": [
 ]};
 const svg=d3.select("#map"),W=1240,H=850;
 const projection=d3.geoMercator(),path=d3.geoPath(projection);
-projection.fitExtent([[35,28],[W-35,H-28]],GEO);
+projection.center([105,35]).scale(1180).translate([W/2,H/2+20]);
 svg.append("g").selectAll("path").data(GEO.features).join("path").attr("class","land").attr("d",path);
 const arrows=svg.append("g"),labels=svg.append("g");
 const labelOffsets=[[10,-14],[10,29],[-60,-14],[-58,29]];
@@ -29,5 +29,5 @@ DATA.forEach((c,i)=>{
 });
 const list=document.getElementById("list");
 DATA.forEach(c=>{const e=document.createElement("div");e.className="rec";e.innerHTML='<div class="name">'+c.city+'</div>'+c.items.map(it=>'<div class="row"><span class="badge">'+it.site+'</span><span class="badge">'+it.d+' m</span><span class="badge">'+it.dir+'</span><span class="badge">'+it.u+'</span></div>').join("");list.appendChild(e)});
-</script><script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+</script>
 </body></html>
