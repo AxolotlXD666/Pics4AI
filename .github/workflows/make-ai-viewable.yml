@@ -24,16 +24,12 @@ jobs:
       - name: Convert image
         run: |
           mkdir -p ai-view
-          convert "屏幕截图 2026-09-30 103956.png" \
-            -resize "1600x1600>" \
-            -strip \
-            -quality 82 \
-            ai-view/screenshot.jpg
+          convert "屏幕截图 2026-09-30 103956.png"             -resize "640x640>"             -strip             -quality 50             ai-view/screenshot.jpg
 
       - name: Commit converted copy
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ai-view/screenshot.jpg
-          git diff --cached --quiet || git commit -m "Add AI-viewable image copy"
+          git diff --cached --quiet || git commit -m "Add smaller AI-viewable image copy"
           git push
