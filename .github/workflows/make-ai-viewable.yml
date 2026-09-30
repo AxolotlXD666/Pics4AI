@@ -1,0 +1,34 @@
+name: Make AI-viewable copy
+
+on:
+  push:
+    paths:
+      - '屏幕截图 2026-09-30 103956.png'
+      - '.github/workflows/make-ai-viewable.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Convert image
+        run: |
+          mkdir -p ai-view
+          magick "屏幕截图 2026-09-30 103956.png" \
+            -resize "1600x1600>" \
+            -strip \
+            -quality 82 \
+            ai-view/screenshot.jpg
+
+      - name: Commit converted copy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ai-view/screenshot.jpg
+          git diff --cached --quiet || git commit -m "Add AI-viewable image copy"
+          git push
