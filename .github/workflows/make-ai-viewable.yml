@@ -6,6 +6,7 @@ on:
       - '屏幕截图 2026-09-30 103956.png'
       - '屏幕截图 2026-09-30 124417.png'
       - '屏幕截图 2026-09-30 131516.png'
+      - '屏幕截图 2026-09-30 134523.png'
       - '.github/workflows/make-ai-viewable.yml'
 
 permissions:
@@ -31,11 +32,12 @@ jobs:
           convert "屏幕截图 2026-09-30 103956.png" -resize "1400x1400>" -strip -quality 75 ai-view/full.jpg
           convert "屏幕截图 2026-09-30 124417.png" -resize "1600x1600>" -strip -quality 85 ai-view/new.jpg
           convert "屏幕截图 2026-09-30 131516.png" -resize "1600x1600>" -strip -quality 85 ai-view/new2.jpg
+          convert "屏幕截图 2026-09-30 134523.png" -resize "1600x1600>" -strip -quality 85 ai-view/new3.jpg
 
       - name: Commit converted copies
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ai-view/screenshot.jpg ai-view/highway.jpg ai-view/full.jpg ai-view/new.jpg ai-view/new2.jpg
+          git add ai-view/screenshot.jpg ai-view/highway.jpg ai-view/full.jpg ai-view/new.jpg ai-view/new2.jpg ai-view/new3.jpg
           git diff --cached --quiet || git commit -m "Add full view for scale measurement"
           git push
