@@ -24,7 +24,7 @@ jobs:
       - name: Convert image
         run: |
           mkdir -p ai-view
-          magick "屏幕截图 2026-09-30 103956.png" \
+          convert "屏幕截图 2026-09-30 103956.png" \
             -resize "1600x1600>" \
             -strip \
             -quality 82 \
